@@ -7,6 +7,7 @@ Ce projet illustre la création d'un système de prédiction décentralisé en u
 - **`create_models.py`** : Entraîne et sauvegarde les modèles (`logistic_regression`, `decision_tree`, `knn`, `random_forest`).
 - **`app.py`** : Expose un modèle via une API Flask sur un port spécifié.
 - **`client.py`** : Interroge les API des modèles, calcule une prédiction consensuelle pondérée et applique des pénalités.
+- **`model_balances.json`** : Stocke les soldes et les précisions des modèles.
 - **`requirements.txt`** : Liste des dépendances Python nécessaires.
 
 ## Prérequis

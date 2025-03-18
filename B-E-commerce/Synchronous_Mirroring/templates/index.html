@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Frontend</title>
+    <style>
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            margin-bottom: 10px;
+        }
+        .section input, .section button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>E-commerce Frontend</h1>
+
+    <!-- Section pour les produits -->
+    <div class="section">
+        <h2>Products</h2>
+        <div id="products"></div>
+        <input id="productName" placeholder="Product Name">
+        <input id="productDescription" placeholder="Description">
+        <input id="productPrice" placeholder="Price">
+        <input id="productCategory" placeholder="Category">
+        <input id="productInStock" placeholder="In Stock (true/false)">
+        <button onclick="addProduct()">Add Product</button>
+    </div>
+
+    <!-- Section pour les commandes -->
+    <div class="section">
+        <h2>Orders</h2>
+        <div id="orders"></div>
+        <input id="orderUserId" placeholder="User ID">
+        <input id="orderProductId" placeholder="Product ID">
+        <input id="orderQuantity" placeholder="Quantity">
+        <button onclick="createOrder()">Create Order</button>
+    </div>
+
+    <!-- Section pour le panier -->
+    <div class="section">
+        <h2>Cart</h2>
+        <div id="cart"></div>
+        <input id="cartUserId" placeholder="User ID">
+        <input id="cartProductId" placeholder="Product ID">
+        <input id="cartQuantity" placeholder="Quantity">
+        <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <script>
+        // Fonction pour afficher les produits
+        async function fetchProducts() {
+            const response = await fetch('/products');
+            const products = await response.json();
+            const productsDiv = document.getElementById('products');
+            productsDiv.innerHTML = products.map(product => `
+                <div>
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p>Price: $${product.price}</p>
+                    <p>Category: ${product.category}</p>
+                    <p>In Stock: ${product.inStock}</p>
+                    <button onclick="deleteProduct(${product.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        // Fonction pour ajouter un produit
+        async function addProduct() {
+            const name = document.getElementById('productName').value;
+            const description = document.getElementById('productDescription').value;
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const inStock = document.getElementById('productInStock').value === 'true';
+
+            await fetch('/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, description, price, category, inStock })
+            });
+            fetchProducts(); // Actualiser la liste des produits
+        }
+
+        // Fonction pour supprimer un produit
+        async function deleteProduct(id) {
+            await fetch(`/products/${id}`, {
+                method: 'DELETE'
+            });
+            fetchProducts(); // Actualiser la liste des produits
+        }
+
+        // Fonction pour créer une commande
+        async function createOrder() {
+            const userId = parseInt(document.getElementById('orderUserId').value);
+            const productId = parseInt(document.getElementById('orderProductId').value);
+            const quantity = parseInt(document.getElementById('orderQuantity').value);
+
+            await fetch('/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId, items: [{ productId, quantity }] })
+            });
+            fetchOrders(userId); // Actualiser la liste des commandes
+        }
+
+        // Fonction pour afficher les commandes
+        async function fetchOrders(userId) {
+            const response = await fetch(`/orders/${userId}`);
+            const orders = await response.json();
+            const ordersDiv = document.getElementById('orders');
+            ordersDiv.innerHTML = orders.map(order => `
+                <div>
+                    <p>Order ID: ${order.id}, Total Price: $${order.totalPrice}, Status: ${order.status}</p>
+                </div>
+            `).join('');
+        }
+
+        // Fonction pour ajouter un produit au panier
+        async function addToCart() {
+            const userId = parseInt(document.getElementById('cartUserId').value);
+            const productId = parseInt(document.getElementById('cartProductId').value);
+            const quantity = parseInt(document.getElementById('cartQuantity').value);
+
+            await fetch(`/cart/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId, quantity })
+            });
+            fetchCart(userId); // Actualiser le panier
+        }
+
+        // Fonction pour afficher le panier
+        async function fetchCart(userId) {
+            const response = await fetch(`/cart/${userId}`);
+            const cartItems = await response.json();
+            const cartDiv = document.getElementById('cart');
+            cartDiv.innerHTML = cartItems.map(item => `
+                <div>
+                    <p>Product ID: ${item.productId}, Quantity: ${item.quantity}</p>
+                    <button onclick="removeFromCart(${userId}, ${item.productId})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        // Fonction pour supprimer un produit du panier
+        async function removeFromCart(userId, productId) {
+            await fetch(`/cart/${userId}/item/${productId}`, {
+                method: 'DELETE'
+            });
+            fetchCart(userId); // Actualiser le panier
+        }
+
+        // Charger les données au démarrage
+        fetchProducts();
+    </script>
+</body>
+</html>

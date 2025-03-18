@@ -2,5 +2,4 @@ flask
 scikit-learn
 pandas
 requests
-joblib
-ngrok
+
