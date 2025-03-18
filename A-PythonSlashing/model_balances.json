@@ -1,0 +1,18 @@
+{
+    "logistic_regression": {
+        "balance": 1000,
+        "accuracy": 0.9
+    },
+    "decision_tree": {
+        "balance": 900,
+        "accuracy": 0.8
+    },
+    "knn": {
+        "balance": 1000,
+        "accuracy": 0.7
+    },
+    "random_forest": {
+        "balance": 900,
+        "accuracy": 0.85
+    }
+}
